@@ -2,7 +2,7 @@ This is a simple command line program to find how long it takes for bounded rule
 
 to run, simply execute  ./cellular 15
 
-where you replace 15 with the number of cells you want.
+where you replace 15 with the number of cells you want.  The automation starts with a single cell enabled, and all others disabled.
 
 I wrote this because I was curious about the chaos of rule 30 (wikipedia if confused).
 I was curious how long it would keep producing unique states if I restricted it to a finite length circle.
