@@ -18,4 +18,5 @@ TEMPLATE = app
 SOURCES += main.cpp
 
 OTHER_FILES += \
-    README.txt
+    README.txt \
+    results.txt

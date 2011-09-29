@@ -6,18 +6,18 @@
 #include <boost/dynamic_bitset.hpp>
 struct circular_equals : std::binary_function<boost::dynamic_bitset<>,boost::dynamic_bitset<>,std::size_t>
 {
-    bool  operator()(const boost::dynamic_bitset<>& x,const boost::dynamic_bitset<>& y) const
+    bool  operator()(const std::pair<boost::dynamic_bitset<>,int>& x,const std::pair<boost::dynamic_bitset<>,int>& y) const
     {
-        for(unsigned int count=0; count<x.size(); count++) {
+        for(unsigned int count=0; count<x.first.size(); count++) {
             bool conflict=false;
             unsigned int index=0;
-            for(unsigned int i=count; i<x.size(); i++) {
-                if(x[i]!=y[index++]) {
+            for(unsigned int i=count; i<x.first.size(); i++) {
+                if(x.first[i]!=y.first[index++]) {
                     conflict=true;
                 }
             }
             for(unsigned int i=0; i<count; i++) {
-                if(x[i]!=y[index++]) {
+                if(x.first[i]!=y.first[index++]) {
                     conflict=true;
                 }
             }
@@ -30,24 +30,22 @@ struct circular_equals : std::binary_function<boost::dynamic_bitset<>,boost::dyn
 };
 
 
-struct circular_hash : std::unary_function<boost::dynamic_bitset<>,std::size_t>
+struct circular_hash : std::unary_function<std::pair<boost::dynamic_bitset<>,int>,std::size_t>
 {
 
-    std::size_t  operator()(const boost::dynamic_bitset<>& x) const
+    std::size_t  operator()(const std::pair<boost::dynamic_bitset<>, int>& x) const
     {
-        // std::cout<<"hash!" <<std::endl;
         std::size_t result=0;
-        for(unsigned int count=0; count<x.size(); count++) {
+        for(unsigned int count=0; count<x.first.size(); count++) {
             std::size_t local_result=0;
-            for(unsigned int i=count; i<x.size(); i++) {
-                local_result=31*local_result+x[i];
+            for(unsigned int i=count; i<x.first.size(); i++) {
+                local_result=31*local_result+x.first[i];
             }
             for(unsigned int i=0; i<count; i++) {
-                local_result=31*local_result+x[i];
+                local_result=31*local_result+x.first[i];
             }
             result^=local_result;
         }
-        //std::cout << std::endl << result <<std::endl;
         return result;
     }
 };
@@ -66,11 +64,11 @@ int main(int argc, char *argv[])
         std::cerr<<"Bad argument given: " << cellsize << " Must be >1"<<std::endl;
         return 2;
     }
-    std::tr1::unordered_set<boost::dynamic_bitset<>,circular_hash,circular_equals> lines;
+    std::tr1::unordered_set<std::pair<boost::dynamic_bitset<>,int>,circular_hash,circular_equals> lines;
     boost::dynamic_bitset<> firstline(cellsize);
     firstline[0]=true;
     boost::dynamic_bitset<> lastline(cellsize);
-    lines.insert(firstline);
+    lines.insert(std::pair<boost::dynamic_bitset<>,int>(firstline,0));
     int count=1;
     while(true) {
         lastline[0]=(firstline[0]|firstline[1])^firstline[cellsize-1];
@@ -85,11 +83,12 @@ int main(int argc, char *argv[])
         lastline[cellsize-1]=(firstline[cellsize-1]| firstline[0]) ^ firstline[cellsize-2];
         //std::cout << lastline[cellsize-1];
        // std::cout<<std::endl;
-        if(lines.count(lastline)) {
-            std::cout << "In " << count <<std::endl;
+        std::pair<boost::dynamic_bitset<>,int> newp(lastline,count);
+        if(lines.count(newp)) {
+            std::cout << "In " << count <<" from cycle started at " << lines.find(newp)->second <<std::endl;
             return 0;
         }
-        lines.insert(lastline);
+        lines.insert(newp);
         lastline.swap(firstline);
         count++;
     }

@@ -19,3 +19,5 @@ together).  I use these for the hash set.
 
 I am guessing that this program is useless theoretically, as there is probably
 a way to calculate these numbers without so much computation
+
+
